@@ -25,7 +25,7 @@ class AbstInt::Set
   end
 
   def each &block
-    @elements.each &block
+    @elements.each(&block)
   end
 
   # for debug

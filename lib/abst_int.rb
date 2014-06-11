@@ -7,7 +7,7 @@ class AbstInt
   class MultiResultError < StandardError
   end
 
-  attr_accessor :terms
+  attr_reader :terms
 
   def initialize num = nil
     @terms = AbstInt::Set.new(AbstInt::Term.new(AbstInt::Variable.new))
