@@ -9,10 +9,20 @@
 # individual file that may not need all of that loaded. Instead, make a
 # separate helper file that requires this one and then use it only in the specs
 # that actually need it.
+require 'simplecov'
+require 'coveralls'
+
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
+  SimpleCov::Formatter::HTMLFormatter,
+  Coveralls::SimpleCov::Formatter
+]
+SimpleCov.start do
+  add_filter '.bundle/'
+end
+
 $LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__)))
 $LOAD_PATH.unshift(File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib')))
 require 'abst_int'
-
 require 'rspec'
 
 #
