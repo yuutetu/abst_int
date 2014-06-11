@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = AbstInt::VERSION
   spec.authors       = ["Yuutetu"]
   spec.email         = ["yuutetu@gmail.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
-  spec.homepage      = ""
+  spec.summary       = %q{Abstract Integer}
+  spec.description   = %q{AbstInt provide abstract integer. This can be used to test exhaustively.}
+  spec.homepage      = "https://github.com/yuutetu/abst_int"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
