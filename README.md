@@ -1,5 +1,10 @@
 # AbstInt
 
+[![Coverage Status](https://coveralls.io/repos/yuutetu/abst_int/badge.png?branch=master)](https://coveralls.io/r/yuutetu/abst_int?branch=master)
+[![Travis Status](https://travis-ci.org/yuutetu/abst_int.svg?branch=master)](https://travis-ci.org/yuutetu/abst_int)
+[![Code Climate](https://codeclimate.com/github/yuutetu/abst_int.png)](https://codeclimate.com/github/yuutetu/abst_int)
+[![Dependency Status](https://gemnasium.com/yuutetu/abst_int.svg)](https://gemnasium.com/yuutetu/abst_int)
+
 TODO: Write a gem description
 
 ## Installation
