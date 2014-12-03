@@ -1,5 +1,6 @@
 require "abst_int/version"
 require "abst_int/or_set"
+require "abst_int/integer"
 
 class AbstInt
 
@@ -27,7 +28,7 @@ class AbstInt
     return AbstInt.new(self.terms * terms)
   end
 
-  def / abst_int
+  def / abst_int_or_int
     raise "not implement"
   end
 
@@ -39,10 +40,14 @@ class AbstInt
     @terms.to_s
   end
 
+  def object
+    AbstInt::Integer.new self
+  end
+
   private
   def to_set abst_int_or_int
     case abst_int_or_int
-    when Integer
+    when ::Integer
       terms = AbstInt::OrSet.new(abst_int_or_int)
     when AbstInt
       terms = abst_int_or_int.terms
