@@ -9,35 +9,23 @@ class AbstInt
 
   attr_reader :terms
 
-  def initialize num = nil
-    @terms = AbstInt::Set.new(AbstInt::Term.new(AbstInt::Variable.new))
+  def initialize terms = AbstInt::Set.new(1, true)
+    @terms = terms
   end
 
-  def + abst_int
-    terms = nil
-    case abst_int
-    when Integer
-      terms = AbstInt::Set.new(AbstInt::Term.new(abst_int))
-    when AbstInt::Term
-      terms = AbstInt::Set.new(abst_int)
-    when AbstInt
-      terms = abst_int.terms
-    end
-
-    cloned_self = self.clone
-    terms.each do |term|
-      cloned_self.terms << term
-    end
-    return cloned_self
+  def + abst_int_or_int
+    terms = to_set abst_int_or_int
+    return AbstInt.new(self.terms + terms)
   end
 
-  def - abst_int
-    self + abst_int * (-1)
+  def - abst_int_or_int
+    terms = to_set abst_int_or_int
+    return AbstInt.new(self.terms - terms)
   end
 
-  def * abst_int
-    abst_int = AbstInt::Term.new abst_int if Integer === abst_int
-    return @terms.inject(AbstInt.empty){|result, term| result + (term * abst_int)}
+  def * abst_int_or_int
+    terms = to_set abst_int_or_int
+    return AbstInt.new(self.terms * terms)
   end
 
   def / abst_int
@@ -45,26 +33,21 @@ class AbstInt
   end
 
   def % num
-    @terms.inject(0){|result, term| [result, term % num].max }
+    return self.terms % num
   end
 
-  # for debug
   def to_s
     @terms.to_s
   end
 
-  def initialize_copy abst_int
-    @terms = abst_int.terms.dup
-  end
-
-  def self.empty
-    abst_int = AbstInt.new
-    abst_int.terms = AbstInt::Set.new
-    return abst_int
-  end
-
-  def terms= terms
-    binding.pry unless AbstInt::Set === terms
-    @terms = terms
+  private
+  def to_set abst_int_or_int
+    case abst_int_or_int
+    when Integer
+      terms = AbstInt::Set.new(abst_int_or_int)
+    when AbstInt
+      terms = abst_int_or_int.terms
+    end
+    return terms
   end
 end

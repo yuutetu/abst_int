@@ -1,13 +1,11 @@
 require "abst_int/variable"
 
 class AbstInt::Term
-  attr_accessor :variables, :coefficient
 
-  def initialize variable_or_number = nil
-    @coefficient = 1
+  def initialize coefficient = nil, be_variable = false
+    @coefficient = coefficient || 1
     @variables = []
-    @coefficient = variable_or_number if (not variable_or_number.nil?) && Fixnum === variable_or_number
-    self << variable_or_number        if (not variable_or_number.nil?) && AbstInt::Variable === variable_or_number
+    self << AbstInt::Variable.new if be_variable
   end
 
   def << variable
@@ -33,10 +31,6 @@ class AbstInt::Term
   end
 
   def * abst_int_or_term
-    if AbstInt === abst_int_or_term
-      abst_int = abst_int_or_term
-      return abst_int.terms.inject(AbstInt.empty){|result, term| result + (self * term)}
-    end
     cloned_term = self.clone
     term = abst_int_or_term
     cloned_term.coefficient *= term.coefficient
@@ -60,15 +54,20 @@ class AbstInt::Term
     "#{@coefficient}#{@variables.map{|var| var.to_s}.join}"
   end
 
-  def initialize_copy term
-    @variables = []
-    term.variables.each do |variable|
-      @variables << variable.dup
-    end
+  protected
+  def coefficient
+    @coefficient
   end
 
-  # def * abst_int
-  #   return abst_int * self if abst_int.class == AbstInt
-  #   return @terms.map{|term| term * abst_int }
-  # end
+  def coefficient= coefficient
+    @coefficient = coefficient
+  end
+
+  def variables
+    @variables
+  end
+
+  def variables= variables
+    @variables = variables
+  end
 end

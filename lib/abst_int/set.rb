@@ -1,11 +1,47 @@
-class AbstInt::Set
-  include Enumerable
-  # for debug
-  attr_reader :elements
+require "abst_int/term"
 
-  def initialize term = nil
+class AbstInt::Set
+  def initialize coefficient = nil, be_variable = false
     @elements = []
-    @elements << term unless term.nil?
+    if coefficient.is_a? Fixnum
+      self  << (AbstInt::Term.new coefficient, be_variable)
+    end
+  end
+
+  def + set
+    cloned_self = self.dup
+    set.each do |term|
+      cloned_self << term
+    end
+    return cloned_self
+  end
+
+  def - set
+    self + set * AbstInt::Set.new(-1)
+  end
+
+  def * set
+    result = AbstInt::Set.new
+    cloned_self = self.dup
+    cloned_self.each do |self_term|
+      set.each do |term|
+        result << (self_term * term)
+      end
+    end
+    return result
+  end
+
+  def % num
+    @elements.inject(0){|result, term| [result, term % num].max }
+  end
+
+  def to_s
+    @elements.map{|element| element.to_s}.join("+")
+  end
+
+  protected
+  def each &block
+    @elements.each(&block)
   end
 
   def << term
@@ -22,21 +58,5 @@ class AbstInt::Set
     new_elements << term unless added_flag
     @elements = new_elements
     return nil
-  end
-
-  def each &block
-    @elements.each(&block)
-  end
-
-  # for debug
-  def to_s
-    @elements.map{|element| element.to_s}.join("+")
-  end
-
-  def initialize_copy set
-    @elements = []
-    set.elements.each do |element|
-      @elements << element.dup
-    end
   end
 end
