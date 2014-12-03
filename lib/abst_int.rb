@@ -1,6 +1,5 @@
 require "abst_int/version"
-require "abst_int/set"
-require "abst_int/term"
+require "abst_int/or_set"
 
 class AbstInt
 
@@ -9,7 +8,7 @@ class AbstInt
 
   attr_reader :terms
 
-  def initialize terms = AbstInt::Set.new(1, true)
+  def initialize terms = AbstInt::OrSet.new(1, true)
     @terms = terms
   end
 
@@ -44,7 +43,7 @@ class AbstInt
   def to_set abst_int_or_int
     case abst_int_or_int
     when Integer
-      terms = AbstInt::Set.new(abst_int_or_int)
+      terms = AbstInt::OrSet.new(abst_int_or_int)
     when AbstInt
       terms = abst_int_or_int.terms
     end
