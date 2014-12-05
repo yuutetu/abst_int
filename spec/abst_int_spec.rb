@@ -1,15 +1,15 @@
 require "spec_helper"
+require "pry"
 
 describe AbstInt do
-  let(:ai2)     { AbstInt.new * 2 }
-  let(:ai3)     { AbstInt.new * 3 }
-  let(:ai6)     { ai2 * ai3 }
-  let(:ai2_o)   { (AbstInt.new * 2).object }
-  let(:ai3_o)   { (AbstInt.new * 3).object }
-  let(:ai6_o)   { (ai2 * ai3).object }
-  let(:ai6_1)   { (ai6 + 1).object }
-  let(:ai6__1)  { (ai6 - 1).object }
-  let(:ai6_2)   { (ai3 + ai3).object }
+  let(:ai2)   { (AbstInt.new * 2).object }
+  let(:ai3)   { (AbstInt.new * 3).object }
+  let(:ai6)   { (ai2 * ai3).object }
+  let(:ai6_1)   { ai6 + 1 }
+  let(:ai6__1)  { ai6 - 1 }
+  let(:ai6_2)   { ai3 + ai3 }
+  let(:ai6_3)   { (AbstInt.new * 2) & (AbstInt.new * 3) }
+  let(:ai6_4)   { (AbstInt.new * 3 + 1).not }
 
   it { expect(ai2   % 2).to eq 0 }
   it { expect(ai3   % 3).to eq 0 }
@@ -23,6 +23,8 @@ describe AbstInt do
   it { expect(ai6__1 % 3).to eq 2 }
   it { expect(ai6__1 % 6).to eq 5 }
   it { expect(ai6_2 % 6).to eq 0 }
+  it { expect(ai6_3 % 6).to eq 0 }
+  it { expect(ai6_4 % 3).not_to eq 1 }
 
   describe "#to_s" do
     it { expect(ai6.to_s).to match /6x/ }

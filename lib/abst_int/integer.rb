@@ -28,4 +28,8 @@ class AbstInt::Integer
   def to_s
     @abst_int.to_s
   end
+
+  def _terms
+    @abst_int.terms
+  end
 end
