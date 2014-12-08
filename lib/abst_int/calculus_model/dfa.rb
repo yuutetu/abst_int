@@ -11,6 +11,18 @@ class NilClass
   def try key, *args
     nil
   end
+
+  def [] some
+    return some
+  end
+
+  def + some
+    return some
+  end
+
+  def | some
+    return some
+  end
 end
 
 module AbstInt::CalculusModel
@@ -67,15 +79,7 @@ module AbstInt::CalculusModel
     end
 
     def to_orset
-      result = nil
-      @final_states.each do |final_state|
-        if result.nil?
-          result = generate_orset @initial_state, final_state, @states
-        else
-          result = result | (generate_orset @initial_state, final_state, @states)
-        end
-      end
-      return result
+      return generate_orset
     end
 
     def equal_transition? dfa
@@ -161,39 +165,61 @@ module AbstInt::CalculusModel
       return dfa
     end
 
-    def generate_orset start, goal, pass_states
-      return cache_check start, goal, pass_states if cache_check start, goal, pass_states
-      if pass_states.empty?
-        result = nil
-        @transition[start].each do |input, to_state|
-          if input == 'a' && to_state == goal
-            result = result.nil? ? AbstInt::OrSet.new(1) : (result | AbstInt::OrSet.new(1))
-          elsif input == 'b' && to_state == goal
-            result = result.nil? ? AbstInt::OrSet.new(-1) : (result | AbstInt::OrSet.new(-1))
+    def generate_orset
+
+      # アルファベットを数字に変更
+      current_dfa = AbstInt::CalculusModel::Dfa.new
+      current_dfa.set_initial @initial_state
+      @final_states.each do |state|
+        current_dfa.add_final state
+      end
+      @transition.each do |state1, value|
+        value.each do |input, state2|
+          case input
+          when 'a'
+            current_dfa.add_trans state1, AbstInt::OrSet.new(1), state2
+          when 'b'
+            current_dfa.add_trans state1, AbstInt::OrSet.new(-1), state2
           end
         end
-        result = result.nil? ? AbstInt::OrSet.new(0) : (result | AbstInt::OrSet.new(0)) if start == goal
-        return result
-      end
-      pass_state = pass_states.to_a.first
-      new_pass_states = pass_states.dup.delete pass_state
-      result1 = (generate_orset start, goal, new_pass_states)
-      result2 = (generate_orset start, pass_state, new_pass_states)
-      result3 = (generate_orset pass_state, pass_state, new_pass_states).try(:star)
-      result4 = (generate_orset pass_state, goal, new_pass_states)
-
-      result = if result1.nil? && (result2.nil? || result4.nil?)
-        nil
-      elsif result1.nil?
-        (if result3.nil?; result2 + result4; else result2 + result3 + result4; end)
-      elsif result2.nil? || result4.nil?
-        result1
-      else
-        result1 | (if result3.nil?; result2 + result4; else  result2 + result3 + result4; end)
       end
 
-      save_cache start, goal, pass_states, result
-      return result
+      remove_states = @states - ([@initial_state] + @final_states.to_a)
+
+      remove_states.each do |state|
+        current_dfa = self_remain_state_for_ofset_dfa! state, current_dfa
+      end
+
+      removed_dfa_without_final = current_dfa
+      current_dfa = nil
+      current_orset = nil
+
+      @final_states.each do |final|
+        current_dfa = removed_dfa_without_final
+        remove_states = current_dfa.states - [@initial_state, final]
+        remove_states.each do |state|
+          current_dfa = self_remain_state_for_ofset_dfa! state, current_dfa
+        end
+        if @initial_state == final then
+          current_dfa.transition[@initial_state].each do |input, state2|
+            if state2 == final
+              current_orset = current_orset | input.star
+            end
+          end
+        else
+          trans_cache = {}
+          current_dfa.transition.each do |state1, value|
+            value.each do |input, state2|
+              trans_cache[state1] ||= {}
+              trans_cache[state1][state2] = input
+            end
+          end
+          match_orset = (trans_cache[@initial_state][@initial_state] | (trans_cache[@initial_state][final] + trans_cache[final][final].try(:star) + trans_cache[final][@initial_state])).try(:star) + trans_cache[@initial_state][final] + trans_cache[final][final].try(:star)
+          current_orset = current_orset | match_orset
+        end
+      end
+
+      return current_orset
     end
 
     def cache_check start, goal, pass_states
@@ -206,6 +232,56 @@ module AbstInt::CalculusModel
       @cache[start][goal] ||= {}
       @cache[start][goal][pass_states] = result
       return nil
+    end
+
+    protected
+    def self_remain_state_for_ofset_dfa! state, current_dfa
+      new_dfa = AbstInt::CalculusModel::Dfa.new
+      in_states, out_states = Set.new, Set.new
+      current_dfa.transition.each do |state1, value|
+        value.each do |input, state2|
+          (out_states << state2; next) if state1 == state && state2 != state
+          (in_states  << state1; next) if state1 != state && state2 == state
+          new_dfa.add_trans state1, input, state2
+        end
+      end
+
+      trans_cache = {}
+      current_dfa.transition.each do |state1, value|
+        value.each do |input, state2|
+          if in_states.include?(state1) ||
+             out_states.include?(state2) ||
+             state == state1 ||
+             state == state2 then
+            trans_cache[state1] ||= {}
+            trans_cache[state1][state2] = input
+          end
+        end
+      end
+
+      in_states.each do |in_state|
+        out_states.each do |out_state|
+          right_orset = nil
+          if trans_cache.try(:[], in_state).try(:[], state) && trans_cache.try(:[], state).try(:[], out_state) then
+            if trans_cache.try(:[], state).try(:[], state) then
+              right_orset = trans_cache[in_state][state] + trans_cache[state][out_state].star + trans_cache[state][out_state]
+            else
+              right_orset = trans_cache[in_state][state] + trans_cache[state][out_state]
+            end
+          end
+          if trans_cache.try(:[], in_state).try(:[], out_state) && right_orset then
+            new_orset = trans_cache[in_state][out_state] | right_orset
+          elsif right_orset then
+            new_orset = right_orset
+          else
+            new_orset = trans_cache[in_state][out_state]
+          end
+
+          new_dfa.add_trans in_state, new_orset, out_state if new_orset
+        end
+      end
+
+      return new_dfa
     end
   end
 end

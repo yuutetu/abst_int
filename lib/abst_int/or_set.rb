@@ -1,12 +1,8 @@
 require "abst_int/set"
 require "abst_int/calculus_model/nfa"
 require "abst_int/collection"
-require "pry"
 
 class AbstInt::OrSet
-  class EmptyOrSetError < StandardError
-  end
-
   def initialize coefficient = nil, be_variable = false
     @elements = []
     if coefficient.is_a? Fixnum
@@ -15,6 +11,7 @@ class AbstInt::OrSet
   end
 
   def + orset
+    return self if orset.nil?
     new_orset = AbstInt::OrSet.new
     orset.each do |set1|
       self.each do |set2|
@@ -42,15 +39,13 @@ class AbstInt::OrSet
     current_mod = []
     self.each do |set|
       mod = set % num
-      # if current_mod && current_mod != mod
-      #   raise AbstInt::MultiResultError, "There are more results than one."
-      # end
       current_mod << mod
     end
     return AbstInt::Collection.new(current_mod)
   end
 
   def | orset
+    return self if orset.is_a? NilClass
     cloned_self = self.dup
     orset.each do |set|
       cloned_self << set
@@ -59,9 +54,18 @@ class AbstInt::OrSet
   end
 
   def & orset
-    left_dfa = (self.to_nfa.to_dfa & AbstInt::CalculusModel::Dfa.filter_dfa)
-    right_dfa = (orset.to_nfa.to_dfa & AbstInt::CalculusModel::Dfa.filter_dfa)
-    result = (left_dfa & right_dfa).to_orset
+    # t = Time.now
+    left_dfa = (self.to_nfa.to_dfa)
+    # p "[generate first dfa]", Time.now - t
+    # t = Time.now
+    right_dfa = (orset.to_nfa.to_dfa)
+    # p "[generate second dfa]", Time.now - t
+    # t = Time.now
+    result = left_dfa & right_dfa
+    # p "[intersection]", Time.now - t
+    # t = Time.now
+    result = result.to_orset
+    # p "[generate semilinear set]", Time.now - t
     return result
   end
 
