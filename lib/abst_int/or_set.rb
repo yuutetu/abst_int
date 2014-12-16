@@ -54,18 +54,10 @@ class AbstInt::OrSet
   end
 
   def & orset
-    # t = Time.now
     left_dfa = (self.to_nfa.to_dfa)
-    # p "[generate first dfa]", Time.now - t
-    # t = Time.now
     right_dfa = (orset.to_nfa.to_dfa)
-    # p "[generate second dfa]", Time.now - t
-    # t = Time.now
     result = left_dfa & right_dfa
-    # p "[intersection]", Time.now - t
-    # t = Time.now
     result = result.to_orset
-    # p "[generate semilinear set]", Time.now - t
     return result
   end
 
@@ -99,7 +91,6 @@ class AbstInt::OrSet
   end
 
   def << set
-    # p "[<< enter]", self.to_s, set.to_s
     expanded = false
     @elements.each { |self_set|
       next if expanded
@@ -110,6 +101,5 @@ class AbstInt::OrSet
       self << expanded_set
     }
     @elements << set unless expanded
-    # p "[<< exit]", self.to_s
   end
 end

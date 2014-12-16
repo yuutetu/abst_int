@@ -61,15 +61,11 @@ class AbstInt::Set
   end
 
   def include? set
-    # p "[include? enter]", self.to_s, set.to_s
-    # binding.pry if self.to_s == "3x_1+0" && set.to_s == "3x_1+3"
     # setの変数に0を代入して計算
     set_offset = set.calc 0
     # その値がselfに含まれているか確認
     input_string = set_offset < 0 ? "b" * (- set_offset) : "a" * set_offset
-    return false.tap{|x|
-      # p "[include? exit 1]", x
-    } unless self.to_nfa.to_dfa.accept? input_string
+    return false unless self.to_nfa.to_dfa.accept? input_string
     # 含まれているならば、変数項の係数の包含関係をチェック
     set.each do |term|
       next unless term.variable_exists?
@@ -78,23 +74,14 @@ class AbstInt::Set
         next unless self_term.variable_exists?
         include_check = include_check || self_term.include?(term)
       end
-      return false.tap{|x|
-        # p "[include? exit 2]", x
-      } unless include_check
+      return false unless include_check
     end
-    return true.tap{|x|
-      # p "[include? exit 3]", x
-    }
+    return true
   end
 
   def expand set
-    # p "[expand enter]", self.to_s, set.to_s
-    return self.tap{|x|
-      # p "[expand exit 1]", x.to_s
-    } if self.include? set
-    return nil.tap{|x|
-      # p "[expand exit 2]", x
-    } unless self.check_lank == 1 && set.check_lank == 0
+    return self if self.include? set
+    return nil unless self.check_lank == 1 && set.check_lank == 0
     set_offset = set.calc 0
     if self.calc(-1) == set_offset
       new_set = AbstInt::Set.new
@@ -102,13 +89,9 @@ class AbstInt::Set
       self.each do |term|
         new_set << term if term.variable_exists?
       end
-      return new_set.tap{|x|
-        # p "[expand exit 3]", x.to_s
-      }
+      return new_set
     else
-      return nil.tap{|x|
-        # p "[expand exit 4]", x
-      }
+      return nil
     end
   end
 
