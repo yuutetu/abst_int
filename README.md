@@ -5,7 +5,7 @@
 [![Code Climate](https://codeclimate.com/github/yuutetu/abst_int.png)](https://codeclimate.com/github/yuutetu/abst_int)
 [![Dependency Status](https://gemnasium.com/yuutetu/abst_int.svg)](https://gemnasium.com/yuutetu/abst_int)
 
-TODO: Write a gem description
+AbstInt provide abstract integer. This can be used to test exhaustively.
 
 ## Installation
 
@@ -23,7 +23,24 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```
+abst2 = (AbstInt.new * 2).object # 2の倍数
+abst3 = (AbstInt.new * 3).object # 3の倍数
+abst2 % 2 #=> 0
+abst3 % 3 #=> 0
+abst2 % 3 #=> AbstInt::MultiResultError
+(abst2 + 1) % 2 #=> 1
+
+abst2_and_3 = ((AbstInt.new * 2) & (AbstInt.new * 3)).object  # 2の倍数かつ3の倍数
+abst2_and_3 % 6 #=> 0
+abst2_and_3 % 2 #=> 0
+abst2_and_3 % 3 #=> 0
+
+not_abst3 = (AbstInt.new * 3).not.object # 3の倍数でない
+not_abst3 % 3 #=> 1 or 2 を表現するオブジェクト
+not_abst3 % 3 == 0 #=> false
+not_abst3 % 3 == 1 #=> AbstInt::MultiResultError
+```
 
 ## Contributing
 
